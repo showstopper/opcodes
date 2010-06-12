@@ -1,0 +1,14 @@
+
+mov.o:     file format elf32-i386
+
+
+Disassembly of section .text:
+
+00000000 <_start>:
+   0:	b8 2a 00 00 00       	mov    eax,0x2a
+   5:	bb 2a 00 00 00       	mov    ebx,0x2a
+   a:	b9 2a 00 00 00       	mov    ecx,0x2a
+   f:	ba 2a 00 00 00       	mov    edx,0x2a
+  14:	89 d8                	mov    eax,ebx
+  16:	89 c3                	mov    ebx,eax
+  18:	89 d9                	mov    ecx,ebx
