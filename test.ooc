@@ -1,9 +1,19 @@
-import instruction, Register
+import instruction, Register, BinarySeq
 
-main: func {
+test: func {}
+main: func -> Int {
     cObj := InstructionBuilder new()
-    cObj insMOV(ebx, eax)
+    printf("%p\n", test as Func)
+    cObj beginFunction()
+       cObj insMOV(ebx, exit as Func)
+       cObj insPUSH(31)
+       cObj insCALL(ebx)
+    cObj endFunction()
+    cObj codeBuffer print()
     cObj text toString() println()
-    cObj data print()
+    f := cObj emitByteCode()
+    f()
+    "yay" println()
+    return -42
 }
 
