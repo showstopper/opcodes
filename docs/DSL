@@ -1,0 +1,58 @@
+opcodes implements the mnemonics by a so-called DSL (=Domain specific language).
+The assembly code is written in pure ooc, x86 instructions have got an "ins"-prefix.
+
+Examples:
+    insMOV(eax, 3)
+    insCALL(ecx)
+    insPUSH(42)
+
+The DSL tries to be as compatible to the Intel-syntax as possible. (NASM, YASM)
+
+The common 32-bit registers reside as self-titled objects (eax, ecx, edx, ...) in the global namespace.
+They inherit from `Reg32`, superclass is `Register`.
+Further 16-/64-bit specific registers will be added soon. (ax, RAX, R8, ...).
+
+Offsets:
+
+An often scene snippet of assembly is something like 
+    
+    mov [ebp+8], 42
+
+which is 
+
+    insMOV([ebp+8], 42) 
+
+in opcodes.
+
+Two things are remarkable. First the "[]" and the "+8". Here we come to the DSL-related
+part. In ooc, "[]" is actually an Array Literal, so "[ebp]" passes an Array containing
+a single Register object. However, we won't ever pass more than one object.
+Again, it's a DSL =) .
+
+Second thing is the "+8". Also nothing spectacular. It is done by simple operator
+overloading. The function copies (clones) the passed object and sets "memOffset" to the
+second operand.
+
+Usage:
+
+    test := func (a, b: Int) -> Int { a+b }
+    
+    cObj := InstructionBuilder new() // cObj stands for "code object"
+    
+    cObj beginFunction() // Saves the current stack-frame
+       cObj insPUSH(42) 
+       cObj insPUSH([ebp+8]) // See `Offsets`
+       cObj insMOV(ebx, test as Func) // Copy the address of a function to ebx
+       cObj insCALL(ebx) // Call the function
+    cObj endFunction() // Sets the old stacke-frame
+    
+    cObj codeBuffer print() // Prints the generated machine code
+    cObj text toString() println() // Prints the code in assembler/mnemonical form
+    
+    f := cObj emitByteCode() as Func(Int) -> Int
+    // the code buffer is returned
+    f(50) toString() println() 
+ 
+
+
+     

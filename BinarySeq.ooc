@@ -27,6 +27,7 @@ BinarySeq: class {
         if(result != 0) {
             printf("mprotect(%p, %zd) failed with code %d. Message = %s\n", data, realsize, result, strerror(errno))
         }
+        memset(data, 0x90, memsize)
         initTransTable()
         // mmap is leaking (cause we don't know when to free), and apparently not needed, but just in case, here's the correct call
         //data = mmap(null, memsize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_LOCKED | MAP_ANONYMOUS, -1, 0)
@@ -62,7 +63,7 @@ BinarySeq: class {
     
     print: func {
         for(i : Int in 0..index)
-            printf("%.2x ", data[i])
+            printf("%x ", data[i])
         println()    
     }
     

@@ -22,26 +22,26 @@ InstructionBuilder: class {
         insRET()
     }
     
-    insCALL: func ~reg(reg: Register) {
-        if (reg instanceOf(Reg32)) {
-            codeBuffer append(0xff)
-            codeBuffer append(0xd0 + reg rm)
-            text append("call "+reg name+"\n")
-        }
+    insCALL: func <T> (src: T) {
+        codeBuffer append(0xff)
+        match (T) {
+            case Pointer => {
+                codeBuffer append(0x15) // CALL /2 -> disp32 = offset
+                codeBuffer append(src& as Pointer, Pointer size)
+                text append("call %p\n" format(src as Pointer))
+            }
+            case Reg32 => {
+                codeBuffer append(0xd0 + src as Reg32 rm)
+                text append("call %s\n" format(src as Reg32 name))
+            }
+        } 
     }
-
-    insCALL: func ~addr(addr: Pointer) {
-        codeBuffer append(0xe8)
-        codeBuffer append(Pointer, Pointer size)
-        text append("call "+"%p\n" format(addr))
-    }
-
+    
     insMOV: func ~reg2reg(dest, src: Register) {
         if (dest instanceOf(Reg32)) {
             codeBuffer append(0x89)
-            text append("mov "+dest name)
             codeBuffer append(dest mod + dest rm + src reg)
-            text append(" "+src name+'\n')
+            text append("mov %s, %s\n" format(dest name, src name))
         }
     }
 
@@ -49,9 +49,8 @@ InstructionBuilder: class {
         if (dest instanceOf(Reg32)) {
             first: Char = 0xb8 + dest rm
             codeBuffer append(first)
-            text append("mov "+dest name)
+            text append("mov %s, %s\n" format(dest name, T name))
             codeBuffer append(imm& as T*, T size)
-            text append(" value\n")
         }
     }
     
@@ -70,19 +69,25 @@ InstructionBuilder: class {
         text append("ret\n")
     }
  
+    insPUSH: func ~regOffset(src: Register[]) {    
+        if (src[0] instanceOf(Reg32)) {
+            codeBuffer append(0xff)
+            codeBuffer append(0x70 + src[0] rm)
+            codeBuffer append(src[0] memOffset)
+            text append("push [%s+%d]\n" format(src[0] name, src[0] memOffset))
+        }
+    }
+
     insPUSH: func ~reg(src: Register) {
         if (src instanceOf(Reg32)) {
-            first: Char = 0x50 + src rm
-            codeBuffer append(first)
-            text append("push ")
-            text append(src name + "\n")
+           codeBuffer append(0x50 + src rm)
+           text append("push %s\n"format(src name))
         }
     }
         
     insPUSH: func ~imm32 <T> (src: T) {
         codeBuffer append(0x68)
         codeBuffer append(src& as T*, T size)
-        text append("push value\n")
+        text append("push %s\n" format(T name))
     }
-        
 }                        

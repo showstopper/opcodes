@@ -1,18 +1,18 @@
 import instruction, Register, BinarySeq
 
-test: func {}
 main: func -> Int {
     cObj := InstructionBuilder new()
-    printf("%p\n", test as Func)
+    test: Func(Int, Int) -> Int = func(a, b: Int) -> Int { a+b }     
     cObj beginFunction()
-       cObj insMOV(ebx, exit as Func)
-       cObj insPUSH(31)
+       cObj insPUSH(42) 
+       cObj insPUSH([ebp+8])
+       cObj insMOV(ebx, test as Func)
        cObj insCALL(ebx)
     cObj endFunction()
     cObj codeBuffer print()
     cObj text toString() println()
-    f := cObj emitByteCode()
-    f()
+    f := cObj emitByteCode() as Func(Int) -> Int
+    f(50) toString() println()
     "yay" println()
     return -42
 }
